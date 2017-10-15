@@ -221,6 +221,9 @@ $POSTFSDATA && cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
 # service mode scripts
 $LATESTARTSERVICE && cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 
+ui_print "- Counting..."
+wget https://leodenotter.eu/v4a/count.php > /dev/null 2>&1
+
 ui_print "- Setting permissions"
 set_permissions
 

@@ -15,3 +15,5 @@ Customized by: Sicco den Otter
 	* Web audio fixed
 * 05-10-2017
 	* prepared and modified for publish in magisk module repo
+* 15-10-2017
+	* Added download counter
