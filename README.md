@@ -17,3 +17,5 @@ Customized by: Sicco den Otter
 	* prepared and modified for publish in magisk module repo
 * 15-10-2017
 	* Added download counter
+* 16-10-2017
+	* Added ping 8.8.8.8 check
