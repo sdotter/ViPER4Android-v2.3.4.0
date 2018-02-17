@@ -19,3 +19,6 @@ Customized by: Sicco den Otter
 	* Added download counter
 * 16-10-2017
 	* Added ping 8.8.8.8 check
+* 17-02-2018
+	* Fixed some issues
+	* Reinitialize audioserver and ViPER4Android on boot
