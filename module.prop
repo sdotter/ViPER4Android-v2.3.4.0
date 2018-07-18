@@ -1,7 +1,7 @@
 id=ViPER4Android-v2.3.4.0
 name=ViPER4Android FX (v2.3.4.0)
-version=v1.3
-versionCode=4
+version=v1.4
+versionCode=5
 author=Sicco den Otter
 description=ViPER4Android v2.3.4.0 (incl. super quality driver)
-template=1400
+minMagisk=1500
