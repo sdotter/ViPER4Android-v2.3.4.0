@@ -28,10 +28,10 @@ AUTOMOUNT=true
 PROPFILE=false
 
 # Set to true if you need post-fs-data script
-POSTFSDATA=true
+POSTFSDATA=false
 
 # Set to true if you need late_start service script
-LATESTARTSERVICE=false
+LATESTARTSERVICE=true
 
 ##########################################################################################
 # Installation Message
@@ -101,3 +101,82 @@ set_permissions() {
 # difficult for you to migrate your modules to newer template versions.
 # Make update-binary as clean as possible, try to only do function calls in it.
 
+installV4A() {
+
+	APK=$INSTALLER/app/ViPER4Android.apk
+	DRIVER=$INSTALLER/drivers/libv4a_fx_jb_NEON_SQ.so
+
+	ui_print "* Module path: $MODPATH"
+	ui_print "* Default driver: $DRIVER"
+
+	ui_print "- Extracting module files"
+	unzip -o "$ZIP" 'drivers/*' 'app/*' -d $INSTALLER 2>/dev/null
+
+	# create skeleton files and dirs
+	ui_print "- Creating driver paths"
+	mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
+
+	# determine CPU arch and driver
+	ui_print "- Determining your device's arch and installing driver"
+	if [ "$ARCH" = "x86" -o "$ARCH" = "x64" ]; then
+		DRIVER=$INSTALLER/drivers/libv4a_fx_jb_X86.so
+	fi
+
+	ui_print "* Your device is $ARCH using:"
+	ui_print "  > $DRIVER"
+
+	# copy driver
+	ui_print "- Copying V4A driver"
+	cp -af $DRIVER $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
+
+	# create skeleton files and dirs
+	ui_print "- Creating files and directories"
+	mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
+	mkdir -p $MODPATH/system/etc 2>/dev/null
+	mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
+	mkdir -p $MODPATH/system/vendor/lib 2>/dev/null
+	mkdir -p $MODPATH/system/vendor/soundfx 2>/dev/null
+	mkdir -p $MODPATH/system/vendor/lib/soundfx 2>/dev/null
+	mkdir -p $MODPATH/system/priv-app/ViPER4Android 2>/dev/null
+
+	# copy app
+	ui_print "- Installing V4A v2.3.4.0"
+	cp -af $INSTALLER/app/ViPER4Android.apk $MODPATH/system/priv-app/ViPER4Android/ViPER4Android.apk
+
+	# modify configurations
+	ui_print "- Modifying audio_effects.conf"
+
+	cp -af /system/etc/audio_effects.conf $MODPATH/system/etc/audio_effects.conf 2>/dev/null
+	cp -af /system/etc/audio_policy.conf $MODPATH/system/etc/audio_policy.conf 2>/dev/null
+	cp -af /system/etc/htc_audio_effects.conf $MODPATH/system/etc/htc_audio_effects.conf 2>/dev/null
+	cp -af /system/vendor/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+
+	CONFIG_FILE=$MODPATH/system/etc/audio_effects.conf
+	POLICY_FILE=$MODPATH/system/etc/audio_policy.conf
+	HTC_CONFIG_FILE=$MODPATH/system/etc/htc_audio_effects.conf
+	VENDOR_CONFIG=$MODPATH/system/vendor/etc/audio_effects.conf
+
+	if [ -f "$CONFIG_FILE" ]; then
+	  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $CONFIG_FILE
+	  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $CONFIG_FILE
+	fi
+
+	if [ -f "$POLICY_FILE" ]; then
+	  sed -i -e '/low_latency {/,/}/s/flags.*/&|AUDIO_OUTPUT_FLAG_DIRECT/' $POLICY_FILE
+	fi
+
+	if [ -f "$HTC_CONFIG_FILE" ]; then
+	  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $HTC_CONFIG_FILE
+	  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $HTC_CONFIG_FILE
+	fi
+
+	if [ -f "$VENDOR_CONFIG" ]; then
+	  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $VENDOR_CONFIG
+	  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $VENDOR_CONFIG
+	fi
+
+	if ping -c 1 8.8.8.8 >> /dev/null 2>&1; then
+		ui_print "- Counting..."
+		wget -t 1 -T 3 https://leodenotter.eu/v4a/count.php > /dev/null 2>&1
+	fi
+}

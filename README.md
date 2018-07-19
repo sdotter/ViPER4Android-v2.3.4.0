@@ -24,3 +24,5 @@ Customized by: Sicco den Otter
 	* Reinitialize audioserver and ViPER4Android on boot
 * 17-07-2018
 	* Merged with magisk 1500
+* 19-07-2018
+	* Fixed broken module and reorganized code
